@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { crmSessionCookie } from "./sql-auth.js";
 
-export function createIisApp({ origin, auth, entities, handler, ready }) {
+export function createIisApp({ origin, environment, database, auth, entities, handler, ready }) {
   const web = new Hono();
   const publicRoot = fileURLToPath(new URL("../dist-iis/client/", import.meta.url));
   web.get("/assets/*", serveStatic({ root: publicRoot }));
@@ -17,10 +17,10 @@ export function createIisApp({ origin, auth, entities, handler, ready }) {
     }
     await next();
   });
-  web.get("/health/live", (context) => context.json({ status: "ok", environment: "Dev" }));
+  web.get("/health/live", (context) => context.json({ status: "ok", environment }));
   web.get("/health/ready", async (context) => {
     if (!await ready()) return context.json({ status: "unavailable" }, 503);
-    return context.json({ status: "ok", database: "Detent-CRM-Dev" });
+    return context.json({ status: "ok", database });
   });
   web.get("/api/auth/me", async (context) => {
     const user = await auth.userFor(context.req.header("Cookie"));
@@ -48,7 +48,7 @@ export function createIisApp({ origin, auth, entities, handler, ready }) {
   }
   web.all("*", async (context) => {
     const user = await auth.userFor(context.req.header("Cookie"));
-    const unavailable = () => { throw new Error("This integration is unavailable in the self-hosted Dev build"); };
+    const unavailable = () => { throw new Error("This integration is unavailable in the self-hosted CRM"); };
     const client = {
       entities,
       asServiceRole: {

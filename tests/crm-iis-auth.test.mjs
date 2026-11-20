@@ -2,6 +2,22 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createIisApp } from "../server/iis-app.js";
 import { hashCrmPassword, verifyCrmPassword } from "../server/sql-auth.js";
+import { iisEnvironment } from "../server/iis-environment.js";
+
+test("IIS separates Dev and Live origins, ports and readiness reporting", async () => {
+  const dev = iisEnvironment({ CRM_ENVIRONMENT: "Dev" });
+  assert.throws(() => iisEnvironment({ CRM_ENVIRONMENT: "Live" }), /verifying Dev/);
+  const live = iisEnvironment({ CRM_ENVIRONMENT: "Live", CRM_LIVE_ENABLED: "true" });
+  assert.notEqual(dev.port, live.port);
+  assert.throws(() => iisEnvironment({ CRM_ENVIRONMENT: "Dev", CRM_PORT: String(live.port) }), /reserved/);
+  assert.throws(() => iisEnvironment({ CRM_ENVIRONMENT: "Dev", CRM_PUBLIC_ORIGIN: live.origin }), /HTTPS origin/);
+  for (const settings of [dev, live]) {
+    const app = createIisApp({ ...settings, ready: () => true });
+    const response = await app.request(settings.origin + "/health/ready");
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: "ok", database: "Detent-CRM-" + settings.environment });
+  }
+});
 
 test("CRM password hashes use a fresh salt and reject wrong credentials", async () => {
   const password = "synthetic-password-only";
@@ -24,7 +40,7 @@ test("Dev HTTP sign-in requires a matching origin and creates a secure session",
   };
   const app = createIisApp({
     origin, auth, entities: {}, ready: () => true,
-    handler: (_request, { context }) => Response.json(context.crmRuntime.user),
+    handler: (_request, { context }) => globalThis.Response.json(context.crmRuntime.user),
   });
   const request = (path, options) => app.request(origin + path, options);
   assert.equal((await request("/api/auth/me")).status, 401);
