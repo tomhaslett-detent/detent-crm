@@ -11,7 +11,7 @@ The local application source was captured from Base44 revision `8aed03088a006250
 | Private worker | Dedicated loopback port and service identity | Separate loopback port and service identity |
 | Private files and secrets | Dev-only storage and configuration | Separate live storage and configuration |
 
-Both sites and their app pools were created in IIS Manager on 20 November 2026. Each has a hostname-specific HTTPS binding with the existing wildcard certificate. Both sites were stopped at handoff. The named SQL databases were created and reported ONLINE in SQL Server Management Studio. The schema, data and worker still need deployment. Verify DNS before activating either site. Choose unused loopback ports on that host. IIS URL Rewrite and ARR are required. Give IIS access only to the generated web root. Keep application code, configuration, uploads and exported CRM records outside that root.
+Both sites and their app pools were created in IIS Manager on 20 November 2026. Each has a hostname-specific HTTPS binding with the existing wildcard certificate. Both sites were stopped at handoff. The named SQL databases reported ONLINE in SQL Server Management Studio. The Dev schema is installed. A SQL Server smoke test inserted a synthetic contact, found it by its secondary association and rolled back the test row. The Live schema, data and workers still need deployment. Verify DNS before activating either site. Choose unused loopback ports on that host. IIS URL Rewrite and ARR are required. Give IIS access only to the generated web root. Keep application code, configuration, uploads and exported CRM records outside that root.
 
 ## Build for the Node host
 
@@ -22,6 +22,8 @@ Run `npm ci`, `node --test tests/*.test.mjs` and `npm run build:iis`. The IIS bu
 On a host with SQL connectivity and a trusted SQL Server certificate, run `deploy/Initialize-CrmDatabases.ps1 -SqlServer <server> -Environment Dev`. Add `-CreateDatabase` only when the setup identity is authorised to create the named database. Run the same command for Live when staging that environment. Both scripts use Windows integrated authentication by default and accept a securely obtained SQL credential if required.
 
 The shared SQL endpoint accepted TCP connections from the development workstation, but its certificate chain was untrusted there. Configure the trusted issuing certificate chain and use the SQL hostname covered by the certificate before attempting Dev setup.
+
+The SQL runtime factory derives its database from `CRM_ENVIRONMENT` (Dev or Live) and reads `CRM_SQL_HOST`, `CRM_SQL_USER`, `CRM_SQL_PASSWORD` and optional `CRM_SQL_PORT`. It requires encryption and certificate validation and checks the target database and table before returning the entity adapter.
 
 Export records using **Settings → Download CRM export** as a Base44 Super Admin. Keep the export outside the repository. Run `deploy/Import-CrmRecords.ps1 -SqlServer <server> -Environment Dev -ExportPath <file> -WhatIf` to check the export and referenced record IDs without connecting to SQL. Omit `-WhatIf` to insert the records in one transaction into a fresh target. Existing IDs or source keys cause the transaction to roll back. The loader keeps record IDs, mapped fields, source fields and association arrays. Use synthetic or approved scrubbed data for Dev.
 
