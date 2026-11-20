@@ -7,6 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:iis": "vite build --config vite.iis.config.js",
+    "start:iis:smoke": "node server/start-iis-smoke.js",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview"
@@ -15,6 +16,7 @@
     "@base44/sdk": "^0.8.63",
     "@base44/vite-plugin": "^1.0.52",
     "@hello-pangea/dnd": "^18.0.1",
+    "@hono/node-server": "2.1.11",
     "@hookform/resolvers": "^5.9.1",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -60,6 +62,7 @@
     "embla-carousel-react": "^8.5.2",
     "exceljs": "^4.4.0",
     "framer-motion": "^11.16.4",
+    "hono": "4.13.19",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",
     "jspdf": "^4.2.1",

@@ -17,6 +17,8 @@ Both sites and their app pools were created in IIS Manager on 20 November 2026. 
 
 Run `npm ci`, `node --test tests/*.test.mjs` and `npm run build:iis`. The IIS build emits browser assets under `dist-iis/client` and a Fetch-compatible TanStack handler at `dist-iis/server/server.js`. It omits the Base44 editor bridge and Cloudflare error reporting. A local Node smoke test rendered the Detent CRM login page with HTTP 200 using that handler. The build still uses Base44 for sign-in and business operations and should only be used for local port testing until the SQL and authentication wiring is complete.
 
+For the loopback HTTP smoke check, set `CRM_ENVIRONMENT=Dev` and run `npm run start:iis:smoke`. It listens only on `127.0.0.1` (default port 3085) and serves the login document, built assets, and branding files. It accepts no sign-in or CRM requests. `/health/live` reports HTTP 200, and `/health/ready` reports HTTP 503 until a production worker replaces this smoke entry. Do not bind either IIS site to this worker.
+
 ## Stage the database and records
 
 On a host with SQL connectivity and a trusted SQL Server certificate, run `deploy/Initialize-CrmDatabases.ps1 -SqlServer <server> -Environment Dev`. Add `-CreateDatabase` only when the setup identity is authorised to create the named database. Run the same command for Live when staging that environment. Both scripts use Windows integrated authentication by default and accept a securely obtained SQL credential if required.

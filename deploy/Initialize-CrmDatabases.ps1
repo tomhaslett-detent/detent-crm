@@ -39,8 +39,10 @@ try {
     $migration = $connection.CreateCommand()
     try {
         $migration.CommandTimeout = 120
-        $migration.CommandText = Get-Content -LiteralPath (Join-Path $PSScriptRoot '../database/001-crm.sql') -Raw
-        [void]$migration.ExecuteNonQuery()
+        foreach ($filename in @('001-crm.sql', '002-auth.sql')) {
+            $migration.CommandText = Get-Content -LiteralPath (Join-Path $PSScriptRoot "../database/$filename") -Raw
+            [void]$migration.ExecuteNonQuery()
+        }
     } finally {
         $migration.Dispose()
     }
