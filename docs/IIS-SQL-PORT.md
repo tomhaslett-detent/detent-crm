@@ -29,6 +29,8 @@ The shared SQL endpoint accepted TCP connections from the development workstatio
 
 The SQL runtime factory derives its database from `CRM_ENVIRONMENT` (Dev or Live) and reads `CRM_SQL_HOST`, `CRM_SQL_USER`, `CRM_SQL_PASSWORD` and optional `CRM_SQL_PORT`. It requires encryption and certificate validation and checks the target database and table before returning the entity adapter.
 
+Use a trusted connection with an authorised SQL setup identity to run `deploy/New-CrmSqlRuntimeLogin.ps1 -SqlServer <certificate-hostname> -Environment Dev`. Supply `-SqlSetupCredential (Get-Credential)` for SQL Server authentication. The script prompts for the dedicated runtime password and reports the login name without printing the password. It grants access only to the CRM tables used by the worker and fails if that login already exists. Use `detent_crm_dev_app` when running `deploy/Install-CrmDevWorker.ps1` from the extracted build on the IIS host.
+
 Export records using **Settings → Download CRM export** as a Base44 Super Admin. Keep the export outside the repository. Run `deploy/Import-CrmRecords.ps1 -SqlServer <server> -Environment Dev -ExportPath <file> -WhatIf` to check the export and referenced record IDs without connecting to SQL. Omit `-WhatIf` to insert the records in one transaction into a fresh target. Existing IDs or source keys cause the transaction to roll back. The loader keeps record IDs, mapped fields, source fields and association arrays. Use synthetic or approved scrubbed data for Dev.
 
 ## Finish the application port before cutover
