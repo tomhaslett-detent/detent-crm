@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [ValidateSet('Dev','Live')][string]$Environment = 'Dev',
     [Parameter(Mandatory)][string]$SqlHost,
     [Parameter(Mandatory)][string]$SqlUser,
     [Parameter(Mandatory)][string]$AdminEmail,
@@ -7,23 +8,27 @@ param(
     [string]$SqlCaFile,
     [string]$NodePath = 'C:\DetentRuntime\node-v24.22.2-win-x64\node.exe',
     [string]$WinSWPath = 'C:\DetentRuntime\downloads\WinSW-x64.exe',
-    [ValidateRange(1024,65535)][int]$Port = 3085
+    [ValidateRange(1024,65535)][int]$Port
 )
 
 $ErrorActionPreference = 'Stop'
 $principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
 if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run on the IIS server as Administrator.' }
 Import-Module WebAdministration
-$site = Get-Website -Name 'Detent-CRM-Dev'
-$webRoot = 'C:\inetpub\detent\detent-crm-dev'
-if (!$site -or $site.physicalPath -ne $webRoot -or $site.State -ne 'Stopped') { throw 'Expected the stopped CRM Dev IIS site and its dedicated web root.' }
-if (@(Get-ChildItem -LiteralPath $webRoot -Force).Count) { throw 'Expected an empty Dev web root.' }
-$serviceName = 'DetentCRMDevAPI'
+$suffix = $Environment.ToLowerInvariant()
+$siteName = "Detent-CRM-$Environment"
+$origin = if ($Environment -eq 'Dev') { 'https://crm-dev.mialab.co.uk' } else { 'https://crm.mialab.co.uk' }
+if (!$PSBoundParameters.ContainsKey('Port')) { $Port = if ($Environment -eq 'Dev') { 3085 } else { 3084 } }
+$site = Get-Website -Name $siteName
+$webRoot = "C:\inetpub\detent\detent-crm-$suffix"
+if (!$site -or $site.physicalPath -ne $webRoot -or $site.State -ne 'Stopped') { throw "Expected the stopped $siteName IIS site and its dedicated web root." }
+if (@(Get-ChildItem -LiteralPath $webRoot -Force).Count) { throw 'Expected an empty CRM web root.' }
+$serviceName = "DetentCRM${Environment}API"
 if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) { throw 'Dev worker service already exists.' }
 if (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue) { throw 'Dev loopback port is in use.' }
 $source = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-$runtimeRoot = 'C:\Apps\Detent\crm-dev'
-$privateRoot = 'C:\DetentData\crm-dev'
+$runtimeRoot = "C:\Apps\Detent\crm-$suffix"
+$privateRoot = "C:\DetentData\crm-$suffix"
 if ((Test-Path -LiteralPath $runtimeRoot) -or (Test-Path -LiteralPath $privateRoot)) { throw 'CRM Dev runtime directories already exist. Review the existing installation.' }
 $npm = Join-Path (Split-Path -Parent $NodePath) 'node_modules\npm\bin\npm-cli.js'
 foreach ($required in @($NodePath, $npm, $WinSWPath, (Join-Path $source 'dist-iis/server/server.js'))) {
@@ -48,22 +53,26 @@ function Read-Secret([string]$Prompt) {
     }
 }
 
-$env:CRM_ENVIRONMENT = 'Dev'
-$env:CRM_PUBLIC_ORIGIN = 'https://crm-dev.mialab.co.uk'
+if ($Environment -eq 'Live') {
+    & "$PSScriptRoot\Test-CrmIisSignIn.ps1" -Environment Dev
+    $env:CRM_LIVE_ENABLED = 'true'
+} else { $env:CRM_LIVE_ENABLED = $null }
+$env:CRM_ENVIRONMENT = $Environment
+$env:CRM_PUBLIC_ORIGIN = $origin
 $env:CRM_PORT = [string]$Port
 $env:CRM_SQL_HOST = $SqlHost
 $env:CRM_SQL_USER = $SqlUser
 $env:NODE_EXTRA_CA_CERTS = $SqlCaFile
 try {
-    $env:CRM_SQL_PASSWORD = Read-Secret 'Dev CRM runtime SQL password'
+    $env:CRM_SQL_PASSWORD = Read-Secret "$Environment CRM runtime SQL password"
     $env:CRM_BOOTSTRAP_EMAIL = $AdminEmail
     $env:CRM_BOOTSTRAP_NAME = $AdminName
-    $env:CRM_BOOTSTRAP_PASSWORD = Read-Secret 'Dev CRM administrator password (minimum 16 characters)'
+    $env:CRM_BOOTSTRAP_PASSWORD = Read-Secret "$Environment CRM administrator password (minimum 16 characters)"
     Push-Location $source
     try {
         Invoke-Checked $NodePath @($npm, 'ci', '--omit=dev', '--no-audit', '--no-fund')
         Invoke-Checked $NodePath @('--input-type=module', '-e', "import sql from 'mssql'; import {connectCrmSql} from './server/sql-runtime.js'; const runtime=await connectCrmSql(sql); await runtime.close();")
-        Invoke-Checked $NodePath @('server/bootstrap-dev-admin.js')
+        Invoke-Checked $NodePath @('server/bootstrap-crm-admin.js')
     } finally { Pop-Location }
     Remove-Item Env:\CRM_BOOTSTRAP_PASSWORD
 
@@ -81,14 +90,14 @@ try {
         Copy-Item -LiteralPath $SqlCaFile -Destination $ca
         $env:NODE_EXTRA_CA_CERTS = $ca
     }
-    $pairs = foreach ($name in 'CRM_ENVIRONMENT','CRM_PUBLIC_ORIGIN','CRM_PORT','CRM_SQL_HOST','CRM_SQL_USER','CRM_SQL_PASSWORD','NODE_EXTRA_CA_CERTS') {
+    $pairs = foreach ($name in 'CRM_ENVIRONMENT','CRM_LIVE_ENABLED','CRM_PUBLIC_ORIGIN','CRM_PORT','CRM_SQL_HOST','CRM_SQL_USER','CRM_SQL_PASSWORD','NODE_EXTRA_CA_CERTS') {
         $value = [Environment]::GetEnvironmentVariable($name)
         if ($value) { '<env name="' + $name + '" value="' + [Security.SecurityElement]::Escape($value) + '" />' }
     }
     $nodeXml = [Security.SecurityElement]::Escape($NodePath)
     $settings = @"
 <service>
-  <id>$serviceName</id><name>Detent CRM Dev API</name>
+  <id>$serviceName</id><name>Detent CRM $Environment API</name>
   <executable>$nodeXml</executable><arguments>server/start-iis.js</arguments>
   <workingdirectory>$runtimeRoot</workingdirectory>
   <startmode>Automatic</startmode>
@@ -110,16 +119,16 @@ try {
     for ($attempt=0; $attempt -lt 15; $attempt++) {
         try {
             $result = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$Port/health/ready" -TimeoutSec 3
-            if ($result.StatusCode -eq 200 -and ($result.Content | ConvertFrom-Json).database -eq 'Detent-CRM-Dev') {
+            if ($result.StatusCode -eq 200 -and ($result.Content | ConvertFrom-Json).database -eq $siteName) {
                 $ready = $true
                 break
             }
         } catch { Start-Sleep -Seconds 2 }
     }
-    if (!$ready) { throw 'Dev worker did not report SQL readiness. IIS was left stopped.' }
-    & "$PSScriptRoot\New-CrmIisWebRoot.ps1" -Environment Dev -WebRoot $webRoot -BackendPort $Port
-    Start-Website -Name 'Detent-CRM-Dev'
-    Write-Output 'Dev IIS started. Verify HTTPS sign-in before doing any Live work.'
+    if (!$ready) { throw 'CRM worker did not report SQL readiness. IIS was left stopped.' }
+    & "$PSScriptRoot\New-CrmIisWebRoot.ps1" -Environment $Environment -WebRoot $webRoot -BackendPort $Port
+    Start-Website -Name $siteName
+    Write-Output "$Environment IIS started. Run Test-CrmIisSignIn.ps1 to verify HTTPS sign-in."
 } finally {
     foreach ($name in 'CRM_SQL_PASSWORD','CRM_BOOTSTRAP_PASSWORD') {
         [Environment]::SetEnvironmentVariable($name, $null)
