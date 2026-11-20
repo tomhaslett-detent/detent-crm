@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 $suffix = if ($Environment -eq 'Dev') { 'crm-dev' } else { 'crm' }
 $siteName = "Detent-CRM-$Environment"
 $hostname = "$suffix.mialab.co.uk"
-$webRoot = Join-Path $SiteRoot $suffix
+$webRoot = Join-Path $SiteRoot ("detent-crm-" + $Environment.ToLowerInvariant())
 Import-Module WebAdministration
 $certificate = Get-Item -LiteralPath "Cert:\LocalMachine\$CertificateStore\$CertificateThumbprint"
 $now = Get-Date

@@ -4,12 +4,14 @@ The local application source was captured from Base44 revision `8aed03088a006250
 
 | Resource | Dev | Live |
 | --- | --- | --- |
-| Proposed HTTPS host | `crm-dev.mialab.co.uk` | `crm.mialab.co.uk` |
+| IIS HTTPS binding | `crm-dev.mialab.co.uk` | `crm.mialab.co.uk` |
+| IIS site and app pool | `Detent-CRM-Dev` | `Detent-CRM-Live` |
+| IIS content directory | `C:\inetpub\detent\detent-crm-dev` | `C:\inetpub\detent\detent-crm-live` |
 | SQL database | `Detent-CRM-Dev` | `Detent-CRM-Live` |
 | Private worker | Dedicated loopback port and service identity | Separate loopback port and service identity |
 | Private files and secrets | Dev-only storage and configuration | Separate live storage and configuration |
 
-The hostnames follow the Engage and Recover naming convention and still need confirmation against the server's DNS and certificate. Choose unused loopback ports on that host. IIS URL Rewrite and ARR are required. Give IIS access only to the generated web root. Keep application code, configuration, uploads and exported CRM records outside that root.
+Both sites and their app pools were created in IIS Manager on 20 November 2026. Each has a hostname-specific HTTPS binding with the existing wildcard certificate. Both sites were stopped at handoff. The named SQL databases were created and reported ONLINE in SQL Server Management Studio. The schema, data and worker still need deployment. Verify DNS before activating either site. Choose unused loopback ports on that host. IIS URL Rewrite and ARR are required. Give IIS access only to the generated web root. Keep application code, configuration, uploads and exported CRM records outside that root.
 
 ## Build for the Node host
 
