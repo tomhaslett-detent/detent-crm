@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-iis/
+.output/
+.tanstack/
+.wrangler/
+.snapshot-transfer/
+.env
+.env.*
+!.env.example
+private/
+*.bak

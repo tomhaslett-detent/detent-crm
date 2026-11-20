@@ -1,0 +1,160 @@
+{
+  "name": "Deal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Deal name"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number",
+      "description": "Deal value"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "GBP",
+        "EUR",
+        "USD",
+        "AUD",
+        "CAD",
+        "NZD",
+        "CHF",
+        "JPY",
+        "SEK",
+        "NOK",
+        "DKK",
+        "SGD",
+        "INR",
+        "ZAR"
+      ]
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "prospect",
+        "engaged",
+        "proposal",
+        "at_risk",
+        "closed_won",
+        "closed_lost"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "purple",
+        "yellow",
+        "green",
+        "red"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "outbound",
+        "inbound",
+        "referral",
+        "partner",
+        "event",
+        "expansion"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "purple",
+        "yellow",
+        "pink"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "description": "Deal owner"
+    },
+    "close_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "probability": {
+      "type": "number"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "last_activity_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lost_reason": {
+      "type": "string"
+    },
+    "team_key": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "hubspot_source_key": {
+      "type": "string"
+    },
+    "hubspot_account_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hubspot_contact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hubspot_source_fields": {
+      "type": "object",
+      "rls": {
+        "read": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

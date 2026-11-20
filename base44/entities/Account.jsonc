@@ -1,0 +1,134 @@
+{
+  "name": "Account",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Primary web domain"
+    },
+    "industry": {
+      "type": "string",
+      "enum": [
+        "saas",
+        "fintech",
+        "agency",
+        "manufacturing",
+        "healthcare",
+        "retail",
+        "logistics",
+        "other"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "pink",
+        "gray",
+        "green",
+        "yellow",
+        "blue",
+        "gray"
+      ]
+    },
+    "employees": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-1000",
+        "1000+"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "blue",
+        "purple",
+        "purple"
+      ]
+    },
+    "region": {
+      "type": "string",
+      "description": "Primary market or region"
+    },
+    "health": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "watch",
+        "at_risk"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "red"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "description": "Account owner"
+    },
+    "arr": {
+      "type": "number",
+      "description": "Annual recurring revenue in EUR"
+    },
+    "website": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Account context and notes"
+    },
+    "last_touch": {
+      "type": "string",
+      "format": "date"
+    },
+    "team_key": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "hubspot_source_key": {
+      "type": "string"
+    },
+    "hubspot_source_fields": {
+      "type": "object",
+      "rls": {
+        "read": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

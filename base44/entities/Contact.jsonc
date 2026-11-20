@@ -1,0 +1,111 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "champion",
+        "decision_maker",
+        "influencer",
+        "blocker",
+        "unknown"
+      ],
+      "enumColors": [
+        "green",
+        "blue",
+        "purple",
+        "red",
+        "gray"
+      ]
+    },
+    "owner": {
+      "type": "string"
+    },
+    "last_engaged": {
+      "type": "string",
+      "format": "date"
+    },
+    "team_key": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "hubspot_source_key": {
+      "type": "string"
+    },
+    "hubspot_source_fields": {
+      "type": "object",
+      "rls": {
+        "read": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "hubspot_account_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "imported_email_status": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "unsubscribed",
+        "no_global_opt_out_recorded"
+      ],
+      "description": "Global email unsubscribe status recorded in the source export. Does not establish subscription permission."
+    }
+  },
+  "required": [
+    "first_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

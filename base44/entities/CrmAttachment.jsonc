@@ -1,0 +1,13 @@
+{
+  "name": "CrmAttachment",
+  "type": "object",
+  "properties": {
+    "activity_id": { "type": "string" },
+    "filename": { "type": "string" },
+    "size": { "type": "number" },
+    "file_uri": { "type": "string" },
+    "source_attachment_id": { "type": "string" }
+  },
+  "required": ["activity_id", "filename", "size", "file_uri"],
+  "rls": { "create": false, "read": false, "update": false, "delete": false }
+}

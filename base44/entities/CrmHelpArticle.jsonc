@@ -1,0 +1,13 @@
+{
+  "name": "CrmHelpArticle",
+  "type": "object",
+  "properties": {
+    "article_key": { "type": "string" },
+    "draft": { "type": "object" },
+    "published": { "type": "object" },
+    "enabled": { "type": "boolean" },
+    "published_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["article_key", "enabled"],
+  "rls": { "create": false, "read": false, "update": false, "delete": false }
+}

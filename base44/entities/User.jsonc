@@ -1,0 +1,38 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The role of the user in the app",
+      "enum": [
+        "admin",
+        "user"
+      ]
+    },
+    "crm_role": {
+      "type": "string",
+      "description": "CRM access level (admin, manager, rep, viewer)",
+      "enum": [
+        "admin",
+        "manager",
+        "rep",
+        "viewer"
+      ],
+      "enumColors": [
+        "purple",
+        "blue",
+        "green",
+        "gray"
+      ],
+      "default": "rep"
+    },
+    "crm_team": {
+      "type": "string",
+      "description": "CRM team or pod the member belongs to"
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

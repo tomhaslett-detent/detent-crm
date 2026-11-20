@@ -1,0 +1,124 @@
+{
+  "name": "Activity",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "call",
+        "meeting",
+        "note",
+        "task",
+        "recovery"
+      ],
+      "enumColors": [
+        "blue",
+        "gray",
+        "green",
+        "yellow",
+        "purple",
+        "red"
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "deal_id": {
+      "type": "string"
+    },
+    "deal_name": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "team_key": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "hubspot_source_key": {
+      "type": "string"
+    },
+    "account_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_attachment_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hubspot_source_fields": {
+      "type": "object",
+      "rls": {
+        "read": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "subject"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

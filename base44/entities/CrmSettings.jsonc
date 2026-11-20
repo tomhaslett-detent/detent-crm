@@ -1,0 +1,63 @@
+{
+  "name": "CrmSettings",
+  "type": "object",
+  "properties": {
+    "company_domain": {
+      "type": "string",
+      "description": "Work email domain allowed for invites, e.g. detent.io"
+    },
+    "enforce_domain": {
+      "type": "boolean",
+      "description": "Only allow invitations to the company domain",
+      "default": true
+    },
+    "default_crm_role": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "rep",
+        "viewer"
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "gray"
+      ],
+      "default": "rep"
+    },
+    "updated_by": {
+      "type": "string"
+    }
+  },
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
