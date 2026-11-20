@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:iis": "vite build --config vite.iis.config.js",
     "start:iis:smoke": "node server/start-iis-smoke.js",
+    "start:iis:dev": "node server/start-iis.js",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview"
@@ -69,6 +70,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.475.0",
     "moment": "^2.31.0",
+    "mssql": "12.8.0",
     "next-themes": "^0.4.4",
     "papaparse": "^5.7.1",
     "react": "^19.1.0",

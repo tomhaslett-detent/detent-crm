@@ -1,4 +1,5 @@
 import { createSqlEntities } from "./sql-entities.js";
+import { createCrmSqlAuth } from "./sql-auth.js";
 
 export function crmSqlConfig(env = process.env) {
   const environment = env.CRM_ENVIRONMENT;
@@ -25,12 +26,12 @@ export async function connectCrmSql(driver, env) {
   try {
     await pool.connect();
     const { recordset: [status] } = await pool.request().query(
-      "SELECT DB_NAME() AS database_name, OBJECT_ID(N'crm.Record', N'U') AS record_table_id",
+      "SELECT DB_NAME() AS database_name, OBJECT_ID(N'crm.Record', N'U') AS record_table_id, OBJECT_ID(N'crm.AuthSession', N'U') AS session_table_id",
     );
-    if (status?.database_name !== config.database || !status.record_table_id) {
+    if (status?.database_name !== config.database || !status.record_table_id || !status.session_table_id) {
       throw new Error("The configured CRM database does not have the CRM schema");
     }
-    return { entities: createSqlEntities(driver, pool), close: () => pool.close() };
+    return { entities: createSqlEntities(driver, pool), auth: createCrmSqlAuth(driver, pool), close: () => pool.close() };
   } catch (error) {
     await pool.close().catch(() => {});
     throw error;

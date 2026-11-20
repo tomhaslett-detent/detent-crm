@@ -24,6 +24,11 @@ function omitPlatformHooks() {
 
 export default defineConfig({
   build: { outDir: "dist-iis" },
-  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+  resolve: { alias: [
+    { find: "@/lib/auth-middleware", replacement: fileURLToPath(new URL("./src/lib/iis-auth-middleware.js", import.meta.url)) },
+    { find: "@/api/base44Client", replacement: fileURLToPath(new URL("./src/api/iis-auth-client.js", import.meta.url)) },
+    { find: "@/components/auth/LoginPage", replacement: fileURLToPath(new URL("./src/components/auth/IisLoginPage.jsx", import.meta.url)) },
+    { find: "@", replacement: fileURLToPath(new URL("./src", import.meta.url)) },
+  ] },
   plugins: [omitPlatformHooks(), tanstackStart({ srcDirectory: "src" }), react()],
 });

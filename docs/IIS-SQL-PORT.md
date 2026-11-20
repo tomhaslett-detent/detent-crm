@@ -1,6 +1,6 @@
 # Detent CRM IIS and SQL Server port
 
-The local application source was captured from Base44 revision `8aed03088a00625047da3ce594368ddf0cd23cad`. The copied frontend and application logic still depend on the Base44 SDK and Cloudflare runtime. The SQL migration, record loader and IIS web-root generator are staging tools. The SQL entity adapter in `server/sql-entities.js` is ready for integration with the self-hosted runtime and must be tested against SQL Server before cutover.
+The local application source was captured from Base44 revision `8aed03088a00625047da3ce594368ddf0cd23cad`. The IIS Dev build uses SQL-backed authentication and record access with the existing CRM policy handlers. The separate Base44 build remains available. The Dev worker still needs an IIS and SQL Server integration test before it serves users.
 
 | Resource | Dev | Live |
 | --- | --- | --- |
@@ -15,9 +15,11 @@ Both sites and their app pools were created in IIS Manager on 20 November 2026. 
 
 ## Build for the Node host
 
-Run `npm ci`, `node --test tests/*.test.mjs` and `npm run build:iis`. The IIS build emits browser assets under `dist-iis/client` and a Fetch-compatible TanStack handler at `dist-iis/server/server.js`. It omits the Base44 editor bridge and Cloudflare error reporting. A local Node smoke test rendered the Detent CRM login page with HTTP 200 using that handler. The build still uses Base44 for sign-in and business operations and should only be used for local port testing until the SQL and authentication wiring is complete.
+Run `npm ci`, `node --test tests/*.test.mjs` and `npm run build:iis`. The IIS build emits browser assets under `dist-iis/client` and a Fetch-compatible TanStack handler at `dist-iis/server/server.js`. It omits the Base44 editor bridge and Cloudflare error reporting. A local test exercised the built handler with a synthetic server-side session and checked that anonymous server function calls return HTTP 401.
 
 For the loopback HTTP smoke check, set `CRM_ENVIRONMENT=Dev` and run `npm run start:iis:smoke`. It listens only on `127.0.0.1` (default port 3085) and serves the login document, built assets, and branding files. It accepts no sign-in or CRM requests. `/health/live` reports HTTP 200, and `/health/ready` reports HTTP 503 until a production worker replaces this smoke entry. Do not bind either IIS site to this worker.
+
+The authenticated Dev entry point is `npm run start:iis:dev`. It starts only after connecting to the verified Dev database. Set `CRM_PUBLIC_ORIGIN` to the exact HTTPS IIS origin and set the SQL environment variables below. The worker accepts state-changing browser requests only from that origin. For the first Dev administrator, a deployment operator can run `node server/bootstrap-dev-admin.js` with `CRM_BOOTSTRAP_EMAIL`, `CRM_BOOTSTRAP_NAME` and `CRM_BOOTSTRAP_PASSWORD` in the process environment. Use a 16-character minimum password and remove the bootstrap variables afterwards. The command refuses to add an administrator if one exists. Live startup is disabled. Work-email invitations, recovery, MFA, private file storage and HubSpot OAuth are pending in the self-hosted build.
 
 ## Stage the database and records
 
