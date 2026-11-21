@@ -1,5 +1,6 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
+    [switch]$TrustLabSqlCertificate,
     [Parameter(Mandatory)][string]$SqlServer,
     [Parameter(Mandatory)][ValidateSet('Dev', 'Live')][string]$Environment,
     [Parameter(Mandatory)][string]$ExportPath,
@@ -73,7 +74,7 @@ $builder = [System.Data.SqlClient.SqlConnectionStringBuilder]::new()
 $builder['Data Source'] = $SqlServer
 $builder['Initial Catalog'] = $database
 $builder['Encrypt'] = $true
-$builder['TrustServerCertificate'] = $false
+$builder['TrustServerCertificate'] = [bool]$TrustLabSqlCertificate
 $builder['Integrated Security'] = !$SqlCredential
 $builder['Application Name'] = 'Detent CRM import'
 $connection = [System.Data.SqlClient.SqlConnection]::new($builder.ConnectionString)

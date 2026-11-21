@@ -25,9 +25,9 @@ The authenticated Dev entry point is `npm run start:iis:dev`. It starts only aft
 
 On a host with SQL connectivity and a trusted SQL Server certificate, run `deploy/Initialize-CrmDatabases.ps1 -SqlServer <server> -Environment Dev`. Add `-CreateDatabase` only when the setup identity is authorised to create the named database. Run the same command for Live when staging that environment. Both scripts use Windows integrated authentication by default and accept a securely obtained SQL credential if required.
 
-The shared SQL endpoint accepted TCP connections from the development workstation, but its certificate chain was untrusted there. Configure the trusted issuing certificate chain and use the SQL hostname covered by the certificate before attempting Dev setup.
+For the shared lab SQL Server, pass `-TrustLabSqlCertificate` to the database setup, runtime login setup, record import and IIS worker installer. This matches Engage and Recover: SQL traffic is encrypted and the server's self-generated certificate is accepted without chain validation. IIS still uses its existing HTTPS certificate.
 
-The SQL runtime factory derives its database from `CRM_ENVIRONMENT` (Dev or Live) and reads `CRM_SQL_HOST`, `CRM_SQL_USER`, `CRM_SQL_PASSWORD` and optional `CRM_SQL_PORT`. It requires encryption and certificate validation and checks the target database and table before returning the entity adapter.
+The SQL runtime factory derives its database from `CRM_ENVIRONMENT` (Dev or Live) and reads `CRM_SQL_HOST`, `CRM_SQL_USER`, `CRM_SQL_PASSWORD` and optional `CRM_SQL_PORT`. It requires encryption and checks the target database and tables before returning the entity adapter. The installer persists `CRM_SQL_TRUST_CERTIFICATE=true` when the lab switch is supplied.
 
 Use a trusted connection with an authorised SQL setup identity to run `deploy/New-CrmSqlRuntimeLogin.ps1 -SqlServer <certificate-hostname> -Environment Dev`. Supply `-SqlSetupCredential (Get-Credential)` for SQL Server authentication. The script prompts for the dedicated runtime password and reports the login name without printing the password. It grants access only to the CRM tables used by the worker and fails if that login already exists. Use `detent_crm_dev_app` when running `deploy/Install-CrmWorker.ps1` from the extracted build on the IIS host.
 

@@ -13,7 +13,7 @@ export function crmSqlConfig(env = process.env) {
   }
   return {
     server, user, password, port, database: "Detent-CRM-" + environment,
-    options: { encrypt: true, trustServerCertificate: false },
+    options: { encrypt: true, trustServerCertificate: env.CRM_SQL_TRUST_CERTIFICATE === "true" },
     pool: { min: 0, max: 10, idleTimeoutMillis: 30_000 },
     connectionTimeout: 10_000,
     requestTimeout: 30_000,

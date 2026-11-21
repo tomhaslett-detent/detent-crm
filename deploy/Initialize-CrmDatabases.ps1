@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [switch]$TrustLabSqlCertificate,
     [Parameter(Mandatory)][string]$SqlServer,
     [Parameter(Mandatory)][ValidateSet('Dev', 'Live')][string]$Environment,
     [PSCredential]$SqlCredential,
@@ -12,7 +13,7 @@ $builder = [System.Data.SqlClient.SqlConnectionStringBuilder]::new()
 $builder['Data Source'] = $SqlServer
 $builder['Initial Catalog'] = if ($CreateDatabase) { 'master' } else { $database }
 $builder['Encrypt'] = $true
-$builder['TrustServerCertificate'] = $false
+$builder['TrustServerCertificate'] = [bool]$TrustLabSqlCertificate
 $builder['Application Name'] = 'Detent CRM database setup'
 $builder['Integrated Security'] = !$SqlCredential
 $connection = [System.Data.SqlClient.SqlConnection]::new($builder.ConnectionString)

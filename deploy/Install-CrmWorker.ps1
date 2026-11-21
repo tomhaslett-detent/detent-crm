@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [switch]$TrustLabSqlCertificate,
     [ValidateSet('Dev','Live')][string]$Environment = 'Dev',
     [Parameter(Mandatory)][string]$SqlHost,
     [Parameter(Mandatory)][string]$SqlUser,
@@ -62,6 +63,7 @@ $env:CRM_PUBLIC_ORIGIN = $origin
 $env:CRM_PORT = [string]$Port
 $env:CRM_SQL_HOST = $SqlHost
 $env:CRM_SQL_USER = $SqlUser
+$env:CRM_SQL_TRUST_CERTIFICATE = if ($TrustLabSqlCertificate) { 'true' } else { 'false' }
 $env:NODE_EXTRA_CA_CERTS = $SqlCaFile
 try {
     $env:CRM_SQL_PASSWORD = Read-Secret "$Environment CRM runtime SQL password"
@@ -90,7 +92,7 @@ try {
         Copy-Item -LiteralPath $SqlCaFile -Destination $ca
         $env:NODE_EXTRA_CA_CERTS = $ca
     }
-    $pairs = foreach ($name in 'CRM_ENVIRONMENT','CRM_LIVE_ENABLED','CRM_PUBLIC_ORIGIN','CRM_PORT','CRM_SQL_HOST','CRM_SQL_USER','CRM_SQL_PASSWORD','NODE_EXTRA_CA_CERTS') {
+    $pairs = foreach ($name in 'CRM_ENVIRONMENT','CRM_LIVE_ENABLED','CRM_PUBLIC_ORIGIN','CRM_PORT','CRM_SQL_HOST','CRM_SQL_USER','CRM_SQL_PASSWORD','CRM_SQL_TRUST_CERTIFICATE','NODE_EXTRA_CA_CERTS') {
         $value = [Environment]::GetEnvironmentVariable($name)
         if ($value) { '<env name="' + $name + '" value="' + [Security.SecurityElement]::Escape($value) + '" />' }
     }
