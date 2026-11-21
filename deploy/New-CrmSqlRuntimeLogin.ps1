@@ -26,8 +26,8 @@ try {
         $connection.Credential = [System.Data.SqlClient.SqlCredential]::new($SqlSetupCredential.UserName, $setupPassword)
     }
     $connection.Open()
-    $runtimePassword = Read-Host "New SQL password for $login (16–128 characters)" -AsSecureString
-    if ($runtimePassword.Length -lt 16 -or $runtimePassword.Length -gt 128) { throw 'Password must be 16–128 characters.' }
+    $runtimePassword = Read-Host "New SQL password for $login (16-128 characters)" -AsSecureString
+    if ($runtimePassword.Length -lt 16 -or $runtimePassword.Length -gt 128) { throw 'Password must be 16-128 characters.' }
     $transaction = $connection.BeginTransaction()
     try {
         $command = $connection.CreateCommand()
