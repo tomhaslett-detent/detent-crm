@@ -100,6 +100,7 @@ try {
     $settings = @"
 <service>
   <id>$serviceName</id><name>Detent CRM $Environment API</name>
+  <description>Detent CRM $Environment loopback worker using SQL Server</description>
   <executable>$nodeXml</executable><arguments>server/start-iis.js</arguments>
   <workingdirectory>$runtimeRoot</workingdirectory>
   <startmode>Automatic</startmode>
